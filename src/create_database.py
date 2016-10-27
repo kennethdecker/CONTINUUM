@@ -10,12 +10,13 @@ http://docs.peewee-orm.com/en/latest/ '''
 from peewee import *
 import os
 
-os.system('rm -rf continuum.db')
+os.system('rm -rf ../database/continuum.db')
 
-db = SqliteDatabase('continuum.db')
+db = SqliteDatabase('../database/continuum.db')
 
 class Battery(Model):
-    weight = FloatField() #Define Weight in lbs
+    name = CharField() #Define entry name
+    weight = FloatField() #Define Weight in g
     volts = FloatField() #Define voltage
     charge = FloatField() #Define battery charge in mAh
     chemistry = CharField() #Define battery chemistry
@@ -26,6 +27,7 @@ class Battery(Model):
         database = db #This model is stored in continuum.db database
 
 class Prop(Model):
+    name = CharField() #Define entry name
     diameter = FloatField() #Define prop diameter in in.
     pitch = FloatField() # Define prop pitch in in/rev
     cad = CharField() #Defin cad file directory
@@ -34,19 +36,23 @@ class Prop(Model):
         database = db #This model is stored in continuum.db database
 
 class Motor(Model):
-    weight = FloatField() #Define weight in lbs
+    name = CharField() #Define entry name
+    weight = FloatField() #Define weight in g
     kv = FloatField() #Define KV in RPM/V
-    shaft_diamter = FloatField() #define shaft diameter in mm
-    cad = CharField() #Define cad file directory
+    max_current = FloatField(null = True) #Define max current in A
+    max_voltage = FloatField(null = True) #Define max Voltage in V
+    shaft_diamter = FloatField(null = True) #define shaft diameter in mm
+    cad = CharField(null = True) #Define cad file directory
 
     class Meta:
         database = db #This model is stored in continuum.db database
 
 class ESC(Model):
+    name = CharField() #Define entry name
     input_voltage = FloatField() #Define Input voltage
     max_constant_current = FloatField() #Define maximum constant current in A
     max_peak_current = FloatField() #Define maximum peak current in A
-    weight = FloatField() #Define weight in lbs
+    weight = FloatField() #Define weight in g
     cad = CharField() #Define cad file directory
 
     class Meta:
