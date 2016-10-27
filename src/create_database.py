@@ -39,8 +39,8 @@ class Motor(Model):
     name = CharField() #Define entry name
     weight = FloatField() #Define weight in g
     kv = FloatField() #Define KV in RPM/V
-    max_current = FloatField() #Define max current in A
-    max_voltage = FloatField() #Define max Voltage in V
+    max_current = FloatField(null = True) #Define max current in A
+    max_voltage = FloatField(null = True) #Define max Voltage in V
     shaft_diamter = FloatField(null = True) #define shaft diameter in mm
     cad = CharField(null = True) #Define cad file directory
 
