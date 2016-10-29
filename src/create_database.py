@@ -21,16 +21,17 @@ class Battery(Model):
     charge = FloatField() #Define battery charge in mAh
     chemistry = CharField() #Define battery chemistry
     num_cells = IntegerField() #Define number of cells in pack
-    cad = CharField() #Define cad file directory
+    cad = CharField(null = True) #Define cad file directory
 
     class Meta:
         database = db #This model is stored in continuum.db database
 
 class Prop(Model):
     name = CharField() #Define entry name
+    weight = FloatField() #Define weight in g
     diameter = FloatField() #Define prop diameter in in.
     pitch = FloatField() # Define prop pitch in in/rev
-    cad = CharField() #Defin cad file directory
+    cad = CharField(null = True) #Defin cad file directory
 
     class Meta:
         database = db #This model is stored in continuum.db database
@@ -40,7 +41,8 @@ class Motor(Model):
     weight = FloatField() #Define weight in g
     kv = FloatField() #Define KV in RPM/V
     max_current = FloatField(null = True) #Define max current in A
-    max_voltage = FloatField(null = True) #Define max Voltage in V
+    Rm = FloatField() #Define terminal resistance in ohms
+    I0 = FloatField(default = 0.0) #Define zero-load current in A
     shaft_diameter = FloatField(null = True) #define shaft diameter in mm
     cad = CharField(null = True) #Define cad file directory
 
