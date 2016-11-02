@@ -6,6 +6,22 @@ import sys
 
 def propulsion_characterization(motorObj, batteryObj, propObj, plot = False):
 
+    '''  This function generates characteristic plots for a propulsion system. Produces plots of RPM, power, 
+    torque, and efficiency vs current. 
+
+    Inputs
+    ------
+    motorObj: (type obj)
+        Input model instance of motor to be used in propulsion system
+    batteryObj:  (type obj)
+        Intput model instance of battery to be used in propulsion system
+    propObj: (type obj)
+        Input model instance of propeller to be used in propulsion system
+    plot: (type bool)
+        Input to determine whether or not plots are generated
+
+     '''
+
     #Extract info from model instances
     Kv = motorObj.kv
     Rm = motorObj.Rm
@@ -57,6 +73,7 @@ def propulsion_characterization(motorObj, batteryObj, propObj, plot = False):
         ax2.set_ylabel('Motor Torque (oz-in)', color='r', fontsize = 12, fontweight = 'bold')
         ax3.set_ylabel('Power out (W)', color='g', fontsize = 12, fontweight = 'bold')
         ax4.set_ylabel('Efficiency', color='m', fontsize = 12, fontweight = 'bold')
+        ax4.set_ylim(bottom = 0.0, top = 1.0)
         plt.show()
 
         fig2 = plt.figure()

@@ -60,11 +60,28 @@ class ESC(Model):
     class Meta:
         database = db #This model is stored in continuum.db database
 
+class QuadParams(Model):
+    name = CharField() #Define name of quad copter
+    thrust_loading = FloatField() #Define the thrust to weight ratio for that class
+    power_loading = FloatField() #Define Power to weight ratio for quad copter class [W/kg]
+
+    class Meta:
+        database = db #This model is stored in continuum.db database
+
+class VehicleClass(Model):
+    quad = ForeignKeyField(QuadParams) #link this field to the Quad Params Table
+
+    class Meta:
+        database = db #This model is stored in continuum.db database
+
+
 db.connect()
 db.create_tables([Battery, \
     Prop, \
     Motor, \
-    ESC])
+    ESC, \
+    QuadParams, \
+    VehicleClass])
 
 ##### Add Motors #####
 
@@ -182,7 +199,26 @@ battery9 = Battery(name = 'Zippy3', weight = 205.0, volts = 16.1, \
             charge = 2200.0, chemistry = 'LiPo', num_cells = 4, cad = None)
 battery9.save()
 
+##### Add Quad Class info ######
+'''  syntax =>
 
-db.close()
+class1 = QuadParams(name = [char], thrust_loading = [float], power_loading = [float])
+
+'''
+
+high_endurance = QuadParams(name = 'High Endurance', thrust_loading = 2.0, power_loading = 75.0)
+high_endurance.save()
+
+trainer = QuadParams(name = 'Trainer', thrust_loading = 2.5, power_loading = 75.0)
+trainer.save()
+
+sport = QuadParams(name = 'Sport', thrust_loading = 4.0, power_loading = 100.0)
+sport.save()
+
+acrobatic = QuadParams(name = 'Acrobatic', thrust_loading = 6.0, power_loading = 125.0)
+acrobatic.save()
+
+racing = QuadParams(name = 'Racing', thrust_loading = 8.0, power_loading = 200.0)
+racing.save()
 
 db.close()
