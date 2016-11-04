@@ -8,6 +8,7 @@ References:
 http://docs.peewee-orm.com/en/latest/ '''
 
 from peewee import *
+import numpy as np
 import os
 
 os.system('rm -rf ../database/continuum.db')
@@ -31,6 +32,7 @@ class Prop(Model):
     weight = FloatField() #Define weight in g
     diameter = FloatField() #Define prop diameter in in.
     pitch = FloatField() # Define prop pitch in in/rev
+    data = CharField(default = 'null') #Define data file directory
     cad = CharField(null = True) #Defin cad file directory
 
     class Meta:
@@ -125,17 +127,16 @@ prop1 = Prop(name = [char], weight = [float], \
             diameter = [float], pitch = [float], cad = [char])
 
 '''
-
-gemfan1 = Prop(name = 'Gemfan1', weight = 3.0, \
-            diameter = 5.0, pitch = 3.0, cad = None)
+gemfan1 = Prop(name = 'Gemfan1', weight = 3.0, diameter = 5.0, pitch = 3.0,
+                data = '../prop_data/5x3.txt', cad = None)
 gemfan1.save()
 
 gemfan2 = Prop(name = 'Gemfan2', weight = 3.0, \
-            diameter = 5.0, pitch = 4.0, cad = None)
+            diameter = 5.0, pitch = 4.0, data = '../prop_data/5x4.txt', cad = None)
 gemfan2.save()
 
 gemfan3 = Prop(name = 'Gemfan', weight = 3.0, \
-            diameter = 5.0, pitch = 4.0, cad = None)
+            diameter = 5.0, pitch = 4.0, data = '../prop_data/5x4.txt', cad = None)
 gemfan3.save()
 
 gemfan4 = Prop(name = 'Gemfan', weight = 3.8, \
@@ -147,7 +148,7 @@ gemfan5 = Prop(name = 'Gemfan', weight = 3.8, \
 gemfan5.save()
 
 gemfan6 = Prop(name = 'Gemfan', weight = 8.5, \
-            diameter = 10.0, pitch = 4.5, cad = None)
+            diameter = 10.0, pitch = 4.5, data = '../prop_data/10x4.7.txt', cad = None)
 gemfan6.save()
 
 gemfan7 = Prop(name = 'Gemfan', weight = 8.5, \
@@ -220,5 +221,6 @@ acrobatic.save()
 
 racing = QuadParams(name = 'Racing', thrust_loading = 8.0, power_loading = 200.0)
 racing.save()
+
 
 db.close()
