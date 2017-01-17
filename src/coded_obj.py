@@ -265,7 +265,6 @@ class CodedObj(object):
 
             i += 1
 
-        k = 0 
         frame_reduced = self.array[:, frame_cols]
         prop_reduced = self.array[:, prop_cols]
 
@@ -282,8 +281,10 @@ class CodedObj(object):
 
             if ([i,j] in omit):
                 remove.append(k)
-        
+
         self.array = np.delete(self.array, remove, axis = 0)
+
+        
 
     def run_topsis(self, scaling_array, decision_array):
 
