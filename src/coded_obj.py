@@ -6,11 +6,48 @@ from query_obj import QueryObj
 from coded_matrix import coded_matrix
 
 class CodedObj(object):
-    def __init__(self, coded_array, level_array, module_list, QueryObj):
-        self.array = coded_array
+    def __init__(self, level_array, module_list, QueryObj):
+
         self.levels = level_array
         self.modules = module_list
         self.query = QueryObj
+        self.coded_matrix()
+
+
+    def coded_matrix(self):
+        levels = self.levels
+
+        m = np.prod(levels)
+        n = np.sum(levels)
+        design = np.zeros((m,n), dtype = np.int)
+
+        categories = len(levels)
+
+        ssize = m
+        ncycles = ssize
+        start = 0
+
+        for i in range(categories):
+
+            coded = np.diag(np.matrix([1]*levels[i]).A1)
+            nreps = ssize/ncycles
+            ncycles = ncycles/levels[i]
+
+            coded = np.repeat(coded, nreps, axis = 1)
+
+            coded = coded.T
+
+            new_coded = coded
+            for j in range(ncycles-1):
+                new_coded = np.vstack((new_coded, coded))
+
+            design = design.T
+            design[start:start + levels[i],:] = new_coded.T
+            start = start + levels[i]
+            design = design.T
+
+        # return design
+        self.array = design
 
 
 
@@ -70,7 +107,7 @@ class CodedObj(object):
 
             self.results = results
 
-        return results
+        # return results
 
     def compute_efficiency(self, batteryObj, motorObj, propObj):
 
@@ -128,7 +165,7 @@ class CodedObj(object):
 
         self.array = np.delete(self.array, remove, axis = 0)
 
-        return self
+        # return self
 
     def thrust_constraint(self, T, I_max):
 
@@ -178,7 +215,7 @@ class CodedObj(object):
 
             i += 1
 
-        k = 0
+        # k = 0
         motor_reduced = self.array[:, motor_cols]
         prop_reduced = self.array[:, prop_cols]
         remove = []
@@ -195,11 +232,59 @@ class CodedObj(object):
             if ([i,j] in omit):
                 remove.append(k)
 
-            k += 1
+            # k += 1
 
         self.array = np.delete(self.array, remove, axis = 0)
 
-        return self
+        # return self
+
+    def frame_constraint(self, SF = 1.1):
+
+        m,n = self.array.shape
+        i = self.modules.index('Frame')
+        frame_start = np.sum(self.levels[:i])
+        frame_cols = range(frame_start, frame_start + self.levels[i])
+        i = self.modules.index('Prop')
+        prop_start = np.sum(self.levels[:i])
+        prop_cols = range(prop_start, prop_start + self.levels[i]) 
+
+        omit = []
+        i = 0
+        j = 0
+
+        for fram in self.query.frame:
+            for prop in self.query.prop:
+
+                length = fram.length    #Unpack frame length
+                D = prop.diameter       #Unpack prop diameter
+
+                if (D*SF > length):
+                    omit.append([i,j])
+
+                j += 1
+
+            i += 1
+
+        frame_reduced = self.array[:, frame_cols]
+        prop_reduced = self.array[:, prop_cols]
+
+        remove = []
+
+        for k in range(m):
+            for ii in range(len(frame_cols)):
+                if frame_reduced[k][ii] == 1:
+                    i = ii
+
+            for jj in range(len(prop_cols)):
+                if prop_reduced[k][jj] == 1:
+                    j = jj
+
+            if ([i,j] in omit):
+                remove.append(k)
+
+        self.array = np.delete(self.array, remove, axis = 0)
+
+        
 
     def run_topsis(self, scaling_array, decision_array):
 
@@ -269,15 +354,19 @@ if __name__ == '__main__':
     data_set = QueryObj(battery_query, motor_query, prop_query)
 
     level_array = np.array([len(battery_query), len(motor_query), len(prop_query)], dtype = np.int)
-    coded_array = coded_matrix(level_array)
+    # coded_array = coded_matrix(level_array)
     module_list = ['Battery', 'Motor', 'Prop']
 
     scaling_array = np.array([.4, .6])
     decision_array = np.array([1,0])
 
-    test_array = CodedObj(coded_array, level_array, module_list, data_set)
+    test_array = CodedObj(level_array, module_list, data_set)
 
-    test_array.evaluate_cases()
+    # test_array.evaluate_cases()
     # test_array.endurance_constraint(10., 100.)
     # test_array.thrust_constraint(500., 15.)
-    test_array.run_topsis(scaling_array, decision_array)
+    # test_array.run_topsis(scaling_array, decision_array)
+
+
+
+
