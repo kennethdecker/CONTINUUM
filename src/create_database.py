@@ -70,6 +70,23 @@ class QuadParams(Model):
     class Meta:
         database = db #This model is stored in continuum.db database
 
+class Frames(Model):
+    name = CharField() #Define name of frame
+    weight = FloatField() #Define weight of frame [g]
+    length = FloatField() #Define length of frame [in]
+    cad = CharField() #Define cad file directory
+
+    class Meta:
+        database = db #This model is stored in continuum.db database
+
+class Controller(Model):
+    name = CharField() #Define name of controller
+    weight = FloatField() #Define weight of controller [g]
+    cad = CharField() #Define cad file directory
+
+    class Meta:
+        database = db #This model is stored in continuum.db database
+
 class VehicleClass(Model):
     quad = ForeignKeyField(QuadParams) #link this field to the Quad Params Table
 
