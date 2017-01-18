@@ -1,0 +1,7 @@
+Time (s),ESC signal (탎),Servo 1 (탎),Servo 2 (탎),Servo 3 (탎),Thrust (N),Voltage (V),Current (A),Motor Electrical Speed (RPM),Motor Optical Speed (RPM),Electrical Power (W),Overall Efficiency (N/W),App message
+1.5,1200,,,,0.811339579,16.17045602,2.037746364,9743,0,32.81349601,0.024725789,
+4.5,1400,,,,1.923018125,15.97551722,6.68055046,14814,0,106.6592444,0.018029549,
+7.5,1600,,,,3.317262914,15.59326699,15.1021051,18630,0,235.3816378,0.014093125,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+*Drew too much current and the safety limit was reached ,,,,,,,,,,,,
