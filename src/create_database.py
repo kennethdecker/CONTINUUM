@@ -153,23 +153,23 @@ gemfan2 = Prop(name = 'Gemfan2', weight = 3.0, \
 gemfan2.save()
 
 gemfan3 = Prop(name = 'Gemfan', weight = 3.0, \
-            diameter = 5.0, pitch = 4.0, data = '../prop_data/5x4.txt', cad = None)
+            diameter = 5.0, pitch = 4.5, data = '../prop_data/5x4_5.txt', cad = None)
 gemfan3.save()
 
 gemfan4 = Prop(name = 'Gemfan', weight = 3.8, \
-            diameter = 6.0, pitch = 3.0, cad = None)
+            diameter = 6.0, pitch = 3.0, data = '../prop_data/6x3.txt', cad = None)
 gemfan4.save()
 
 gemfan5 = Prop(name = 'Gemfan', weight = 3.8, \
-            diameter = 6.0, pitch = 4.5, cad = None)
+            diameter = 6.0, pitch = 4.5, data = '../prop_data/6x4_5.txt', cad = None)
 gemfan5.save()
 
 gemfan6 = Prop(name = 'Gemfan', weight = 8.5, \
-            diameter = 10.0, pitch = 4.5, data = '../prop_data/10x4.7.txt', cad = None)
+            diameter = 10.0, pitch = 4.5, data = '../prop_data/10x4_5.txt', cad = None)
 gemfan6.save()
 
 gemfan7 = Prop(name = 'Gemfan', weight = 8.5, \
-            diameter = 12.0, pitch = 4.5, cad = None)
+            diameter = 12.0, pitch = 4.5, data = '../prop_data/12x4_5.txt', cad = None)
 gemfan7.save()
 
 ##### Add Battery #####
