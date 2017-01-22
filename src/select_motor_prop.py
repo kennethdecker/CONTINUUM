@@ -71,20 +71,32 @@ def select_motor_prop(motorObj, propObj, batObj, T, I_max):
         fit1 = np.polyfit(n_list, Ct_list, 1)
         p = np.poly1d(fit1)
 
-        n_new = 5000.0
+        n_new = 200.0
         Ct = 1.0
-
         eps = 1.
 
         i = 1
         while eps > 1e-6:
             
             n_old = n_new
-            Ct = p(n_old)
-            n_new = np.sqrt(T/(rho*Ct*((D/12.)**4.0)))
+            # Ct = p(n_old)
+            # n_new = np.sqrt(T/(rho*Ct*((D/12.)**4.0)))
+            # lam = .8
+            # n_new = lam*n_new + (1-lam)*n_old
+
+            h = 1e-4
+            f1 = p(n_old) - (T/(rho*(n_old**2.)*((D/12.)**4.)))
+            n_h = n_old + h
+            f2 =  p(n_h) - (T/(rho*(n_h**2.)*((D/12.)**4.)))
+            f_prime = (f2-f1)/h
+
+            n_new = n_old - (f1/f_prime)
 
             eps = np.abs((n_new - n_old)/n_old)
+
             i += 1
+            # print 'n_new = %f' % n_new
+            # print 'Ct = %f' % Ct
 
             if i > 100:
                 print 'max iter reached'
@@ -92,7 +104,7 @@ def select_motor_prop(motorObj, propObj, batObj, T, I_max):
                 print 'esps = %f' % eps
                 sys.exit()
 
-
+        print i
         n_list2, Cq_list = np.loadtxt(data_folder + 'n_vs_cq.txt', skiprows = 1, unpack = True)
         fit2 = np.polyfit(n_list2, Cq_list, 1)
         p2 = np.poly1d(fit2)
@@ -118,7 +130,8 @@ if __name__ == '__main__':
     db.connect()
 
     motor_query = Motor.select().where(Motor.name == 'MT-1806').get()
-    prop_query = Prop.select().where(Prop.name == 'Gemfan1').get()
+    # prop_query = Prop.select().where(Prop.diameter == 10.0).get()
+    prop_query = Prop.select().where(Prop.name == 'Gemfan 5x4.5').get()
     bat_query = Battery.select().where(Battery.name == 'Zippy1').get()
 
     print select_motor_prop(motor_query, prop_query, bat_query, 200.0, 15.0)

@@ -121,7 +121,7 @@ class CodedObj(object):
 
         self.attribute_list = attribute_list
         self.results = results
-        print b
+        print '%d Current computaions failed to converge' % b
 
         # return results
 
@@ -183,9 +183,20 @@ class CodedObj(object):
             while eps > 1e-4:
                 
                 n_old = n_new
-                Ct = p(n_old)
-                print Ct
-                n_new = np.sqrt(T/(rho*Ct*((D/12.)**4.0)))
+                # Ct = p(n_old)
+                
+                # n_new = np.sqrt(T/(rho*Ct*((D/12.)**4.0)))
+
+                # lam = .8
+                # n_new = lam*n_new + (1-lam)*n_old
+
+                h = 1e-4
+                f1 = p(n_old) - (T/(rho*(n_old**2.)*((D/12.)**4.)))
+                n_h = n_old + h
+                f2 =  p(n_h) - (T/(rho*(n_h**2.)*((D/12.)**4.)))
+                f_prime = (f2-f1)/h
+
+                n_new = n_old - (f1/f_prime)                
 
                 eps = np.abs((n_new - n_old)/n_old)
                 i += 1
@@ -212,7 +223,7 @@ class CodedObj(object):
 
     def compute_endurance(self, batteryObj, I, SF = .71):
         Q = batteryObj.charge*(60.0/1000.0)
-        t = (Q/SF)/I
+        t = (Q*SF)/I
 
         return t
 
@@ -265,7 +276,7 @@ class CodedObj(object):
         j = 0
         k = 0
 
-        for bat in self.battery_query:
+        for bat in self.query.battery:
 
             for mot in self.query.motor:
 
@@ -280,6 +291,7 @@ class CodedObj(object):
                     kv = mot.kv
                     I_max = mot.max_current
                     I0 = mot.I0
+                    Rm = mot.Rm
                     kt = 1352.4/kv
                     rho = .002378
 
@@ -292,7 +304,7 @@ class CodedObj(object):
                         fit1 = np.polyfit(n_list, Ct_list, 1)
                         p = np.poly1d(fit1)
 
-                        n_new = 5000.0
+                        n_new = 200.0
                         Ct = 1.0
 
                         eps = 1.
@@ -301,8 +313,16 @@ class CodedObj(object):
                         while eps > 1e-6:
                             
                             n_old = n_new
-                            Ct = p(n_old)
-                            n_new = np.sqrt(T/(rho*Ct*((D/12.)**4.0)))
+                            # Ct = p(n_old)
+                            # n_new = np.sqrt(T/(rho*Ct*((D/12.)**4.0)))
+
+                            h = 1e-4
+                            f1 = p(n_old) - (T/(rho*(n_old**2.)*((D/12.)**4.)))
+                            n_h = n_old + h
+                            f2 =  p(n_h) - (T/(rho*(n_h**2.)*((D/12.)**4.)))
+                            f_prime = (f2-f1)/h
+
+                            n_new = n_old - (f1/f_prime)
 
                             eps = np.abs((n_new - n_old)/n_old)
                             i += 1
@@ -487,15 +507,15 @@ if __name__ == '__main__':
 
     # test_array.evaluate_cases()
     # test_array.endurance_constraint(10., 100.)
-    # test_array.thrust_constraint(500., 15.)
+    # test_array.thrust_constraint(200.)
     # test_array.run_topsis(scaling_array, decision_array)
     # print test_array.results
-# 
-    mot = Motor.select().where(Motor.name == 'NTM PropDrive 28-36').get()
-    bat = Battery.select().where(Battery.name == 'Zippy3').get()
-    prop = Prop.select().where(Prop.diameter == 12.0).get()
 
-    test_array.compute_current(bat, mot, prop, 300.)
+    # mot = Motor.select().where(Motor.name == 'NTM PropDrive 28-36').get()
+    # bat = Battery.select().where(Battery.name == 'Zippy3').get()
+    # prop = Prop.select().where(Prop.diameter == 12.0).get()
+
+    # test_array.compute_current(bat, mot, prop, 300.)
 
 
 
