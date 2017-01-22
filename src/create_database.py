@@ -113,27 +113,27 @@ motor1 = Motor(name = [char], weight = [float], kv = [float], \
 '''
 
 ntm_2826 = Motor(name = 'NTM PropDrive 28-26', weight = 54.0, kv = 1200.0, \
-    max_current = 17.0, Rm = .573, shaft_diameter = 3.0, cad = None)
+    max_current = 17.0, Rm = .05899, shaft_diameter = 3.0, cad = None)
 ntm_2826.save()
 
 ntm_2836 = Motor(name = 'NTM PropDrive 28-36', weight = 87.0, kv = 750.0, \
-    max_current = 18.0, Rm = .827, shaft_diameter = 4.0, cad = None)
+    max_current = 18.0, Rm = .06236, shaft_diameter = 4.0, cad = None)
 ntm_2836.save()
 
 mt_1806 = Motor(name = 'MT-1806', weight = 18.0, kv = 2280.0, \
-    max_current = 12.0, Rm = .388, shaft_diameter = 2.0, cad = None)
+    max_current = 12.0, Rm = .04897, shaft_diameter = 2.0, cad = None)
 mt_1806.save()
 
 mt_2206 = Motor(name = 'MT-2206', weight = 32.0, kv = 1900.0, \
-    max_current = 15.0, Rm = .326, shaft_diameter = 3.0, cad = None)
+    max_current = 15.0, Rm = .05627, shaft_diameter = 3.0, cad = None)
 mt_2206.save()
 
 pm_1806 = Motor(name = 'PM-1806', weight = 19.0, kv = 2300.0, \
-    max_current = 15.0, Rm = .5867, shaft_diameter = 3.0, cad = None)
+    max_current = 15.0, Rm = .05514, shaft_diameter = 3.0, cad = None)
 pm_1806.save()
 
 rs_2205 = Motor(name = 'RS-2205', weight = 30.0, kv = 2300.0, \
-    max_current = 30.0, Rm = .178, shaft_diameter = 3.0, cad = None)
+    max_current = 30.0, Rm = .06320, shaft_diameter = 3.0, cad = None)
 rs_2205.save()
 
 
@@ -144,32 +144,32 @@ prop1 = Prop(name = [char], weight = [float], \
             diameter = [float], pitch = [float], cad = [char])
 
 '''
-gemfan1 = Prop(name = 'Gemfan1', weight = 3.0, diameter = 5.0, pitch = 3.0,
-                data = '../prop_data/5x3.txt', cad = None)
+gemfan1 = Prop(name = 'Gemfan 5x3', weight = 3.0, diameter = 5.0, pitch = 3.0,
+                data = '../prop_data/5x3/', cad = None)
 gemfan1.save()
 
-gemfan2 = Prop(name = 'Gemfan2', weight = 3.0, \
-            diameter = 5.0, pitch = 4.0, data = '../prop_data/5x4.txt', cad = None)
+gemfan2 = Prop(name = 'Gemfan 5x4', weight = 3.0, \
+            diameter = 5.0, pitch = 4.0, data = '../prop_data/5x4/', cad = None)
 gemfan2.save()
 
-gemfan3 = Prop(name = 'Gemfan', weight = 3.0, \
-            diameter = 5.0, pitch = 4.5, data = '../prop_data/5x4_5.txt', cad = None)
+gemfan3 = Prop(name = 'Gemfan 5x4.5', weight = 3.0, \
+            diameter = 5.0, pitch = 4.5, data = '../prop_data/5x4_5/', cad = None)
 gemfan3.save()
 
-gemfan4 = Prop(name = 'Gemfan', weight = 3.8, \
-            diameter = 6.0, pitch = 3.0, data = '../prop_data/6x3.txt', cad = None)
+gemfan4 = Prop(name = 'Gemfan 6x3', weight = 3.8, \
+            diameter = 6.0, pitch = 3.0, data = '../prop_data/6x3/', cad = None)
 gemfan4.save()
 
-gemfan5 = Prop(name = 'Gemfan', weight = 3.8, \
-            diameter = 6.0, pitch = 4.5, data = '../prop_data/6x4_5.txt', cad = None)
+gemfan5 = Prop(name = 'Gemfan 6x4.5', weight = 3.8, \
+            diameter = 6.0, pitch = 4.5, data = '../prop_data/6x4_5/', cad = None)
 gemfan5.save()
 
-gemfan6 = Prop(name = 'Gemfan', weight = 8.5, \
-            diameter = 10.0, pitch = 4.5, data = '../prop_data/10x4_5.txt', cad = None)
+gemfan6 = Prop(name = 'Gemfan 10x4.5', weight = 8.5, \
+            diameter = 10.0, pitch = 4.5, data = '../prop_data/10x4_5/', cad = None)
 gemfan6.save()
 
-gemfan7 = Prop(name = 'Gemfan', weight = 8.5, \
-            diameter = 12.0, pitch = 4.5, data = '../prop_data/12x4_5.txt', cad = None)
+gemfan7 = Prop(name = 'Gemfan 12x4.5', weight = 8.5, \
+            diameter = 12.0, pitch = 4.5, data = '../prop_data/12x4_5/', cad = None)
 gemfan7.save()
 
 ##### Add Battery #####
