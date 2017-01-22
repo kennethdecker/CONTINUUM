@@ -54,13 +54,13 @@ class CodedObj(object):
     def evaluate_cases(self):
 
         m,n = self.array.shape
-        attributes = 2
-        results = np.zeros((m, attributes), dtype = np.float64)
+        attribute_list = ['Weight', 'Efficiency', 'Current', 'Endurance']
+        results = np.zeros((m, len(attribute_list)), dtype = np.float64)
         modules = len(self.levels)
 
         if np.sum(self.levels) != n:
             raise ValueError('Sum of level array must equal number of clumns of coded matrix')
-
+        b = 0
         for i in range(m):
 
             row = self.array[i]
@@ -101,11 +101,27 @@ class CodedObj(object):
                     col = col + 1
 
             efficiency = self.compute_efficiency(battery, motor, prop)
+            I = self.compute_current(battery, motor, prop, weight)
+            endurance = self.compute_endurance(battery, I)
 
-            results[i][0] = weight
-            results[i][1] = efficiency
+            if np.isnan(I):
+                b += 1
 
-            self.results = results
+            # results[i][0] = weight
+            # results[i][1] = efficiency
+            for j in range(len(attribute_list)):
+                if attribute_list[j] == 'Weight':
+                    results[i][j] = weight
+                elif attribute_list[j] == 'Efficiency':
+                    results[i][j] = efficiency
+                elif attribute_list[j] == 'Current':
+                    results[i][j] = I
+                elif attribute_list[j] == 'Endurance':
+                    results[i][j] = endurance
+
+        self.attribute_list = attribute_list
+        self.results = results
+        print b
 
         # return results
 
@@ -135,6 +151,70 @@ class CodedObj(object):
         eta = np.divide(P_out,P_in)
 
         return np.max(eta)
+
+    def compute_current(self, batteryObj, motorObj, propObj, T):
+        #Unpack Prop Info
+        D = propObj.diameter
+        pitch = propObj.pitch
+        data_folder = propObj.data
+
+        #Unpack Motor Info
+        kv = motorObj.kv
+        motor_I_max = motorObj.max_current
+        Rm = motorObj.Rm
+        I0 = motorObj.I0
+        kt = 1352.4/kv
+        rho = .002378
+
+        #Unpack Battery info
+        V_in = batteryObj.volts
+
+        if data_folder != 'null':
+            n_list, Ct_list = np.loadtxt(data_folder + 'n_vs_ct.txt', skiprows = 1, unpack = True) #Unpack info from raw data
+            fit1 = np.polyfit(n_list, Ct_list, 1)
+            p = np.poly1d(fit1)
+
+            n_new = 200.0
+            Ct = 1.0
+
+            eps = 1.
+
+            i = 1
+            while eps > 1e-4:
+                
+                n_old = n_new
+                Ct = p(n_old)
+                print Ct
+                n_new = np.sqrt(T/(rho*Ct*((D/12.)**4.0)))
+
+                eps = np.abs((n_new - n_old)/n_old)
+                i += 1
+
+                if i > 200:
+                    print 'max iter reached'
+                    print 'n = %f ' % n_new
+                    print 'eps = %f' % eps
+                    # sys.exit()
+
+
+            n_list2, Cq_list = np.loadtxt(data_folder + 'n_vs_cq.txt', skiprows = 1, unpack = True)
+            fit2 = np.polyfit(n_list2, Cq_list, 1)
+            p2 = np.poly1d(fit2)
+
+            Cq = p2(n_new)
+            tau = Cq*rho*(n_new**2.0)*((D/12.)**5.)
+            rpm = n_new*60.
+
+            I_req = (tau/kt) + I0
+            V_req = (rpm/kv) + I_req*Rm
+            
+            return I_req
+
+    def compute_endurance(self, batteryObj, I, SF = .71):
+        Q = batteryObj.charge*(60.0/1000.0)
+        t = (Q/SF)/I
+
+        return t
 
     def endurance_constraint(self, endurance, power, SF = .71):
 
@@ -167,7 +247,7 @@ class CodedObj(object):
 
         # return self
 
-    def thrust_constraint(self, T, I_max):
+    def thrust_constraint(self, T):
 
         m,n = self.array.shape
         i = self.modules.index('Motor')
@@ -175,64 +255,107 @@ class CodedObj(object):
         motor_cols = range(motor_start, motor_start + self.levels[i])
         i = self.modules.index('Prop')
         prop_start = np.sum(self.levels[:i])
-        prop_cols = range(prop_start, prop_start + self.levels[i])     
+        prop_cols = range(prop_start, prop_start + self.levels[i])
+        i = self.modules.index('Battery')
+        bat_start = np.sum(self.levels[:i])
+        bat_cols = range(bat_start, bat_start + self.levels[i])     
 
         omit = []
         i = 0
         j = 0
+        k = 0
 
-        for mot in self.query.motor:
+        for bat in self.battery_query:
 
-            for prop in self.query.prop:
+            for mot in self.query.motor:
 
-                #Unpack Prop Info
-                D = prop.diameter
-                pitch = prop.pitch
-                data_file = prop.data
+                for prop in self.query.prop:
 
-                #Unpack Motor Info
-                kv = mot.kv
-                motor_I_max = mot.max_current
-                kt = 1352.4/kv
-                rho = 1.225
+                    #Unpack Prop Info
+                    D = prop.diameter
+                    pitch = prop.pitch
+                    data_folder = prop.data
 
-                #Evaluate Required current
-                if data_file != 'null':
-                    J, Ct, Cp, eta = np.loadtxt(data_file, skiprows = 1, unpack = True) #Unpack info from raw data
-                    Ct = Ct[0]
-                    Cp = Cp[0]
+                    #Unpack Motor Info
+                    kv = mot.kv
+                    I_max = mot.max_current
+                    I0 = mot.I0
+                    kt = 1352.4/kv
+                    rho = .002378
 
-                    n_req = np.sqrt(T/(Ct*rho*(D**4.0)))
-                    P = Cp*rho*(n_req**3.0)*(D**5.0)
-                    omega_req = n_req*2*np.pi
-                    tau = P/omega_req
-                    I_req = tau/kt
+                    #Unpack Battery Info
+                    V_in = bat.volts
 
-                    if not (I_req < I_max and I_req < motor_I_max):
-                        omit.append([i,j])
+                    #Evaluate Required current
+                    if data_folder != 'null':
+                        n_list, Ct_list = np.loadtxt(data_folder + 'n_vs_ct.txt', skiprows = 1, unpack = True) #Unpack info from raw data
+                        fit1 = np.polyfit(n_list, Ct_list, 1)
+                        p = np.poly1d(fit1)
 
-                j += 1
+                        n_new = 5000.0
+                        Ct = 1.0
 
-            i += 1
+                        eps = 1.
+
+                        i = 1
+                        while eps > 1e-6:
+                            
+                            n_old = n_new
+                            Ct = p(n_old)
+                            n_new = np.sqrt(T/(rho*Ct*((D/12.)**4.0)))
+
+                            eps = np.abs((n_new - n_old)/n_old)
+                            i += 1
+
+                            if i > 100:
+                                print 'max iter reached'
+                                print 'n = %f ' % n_new
+                                print 'esps = %f' % eps
+                                sys.exit()
+
+
+                        n_list2, Cq_list = np.loadtxt(data_folder + 'n_vs_cq.txt', skiprows = 1, unpack = True)
+                        fit2 = np.polyfit(n_list2, Cq_list, 1)
+                        p2 = np.poly1d(fit2)
+
+                        Cq = p2(n_new)
+                        tau = Cq*rho*(n_new**2.0)*((D/12.)**5.)
+                        rpm = n_new*60.
+
+                        I_req = (tau/kt) + I0
+                        V_req = (rpm/kv) + I_req*Rm
+
+                        if not ((I_req< I_max) and (V_req < V_in)):
+                            omit.append([i,j,k])
+
+                    j += 1
+
+                i += 1
+
+            k += 1
 
         # k = 0
         motor_reduced = self.array[:, motor_cols]
         prop_reduced = self.array[:, prop_cols]
+        bat_reduced = self.array[:, bat_cols]
         remove = []
 
-        for k in range(m):
+        for a in range(m):
             for ii in range(len(motor_cols)):
-                if motor_reduced[k][ii] == 1:
+                if motor_reduced[a][ii] == 1:
                     i = ii
 
             for jj in range(len(prop_cols)):
-                if prop_reduced[k][jj] == 1:
+                if prop_reduced[a][jj] == 1:
                     j = jj
 
-            if ([i,j] in omit):
-                remove.append(k)
+            for kk in range(len(bat_cols)):
+                if bat_reduced[a][kk] == 1:
+                    k = kk
 
-            # k += 1
+            if ([i,j,k] in omit):
+                remove.append(a)
+
 
         self.array = np.delete(self.array, remove, axis = 0)
 
@@ -366,7 +489,13 @@ if __name__ == '__main__':
     # test_array.endurance_constraint(10., 100.)
     # test_array.thrust_constraint(500., 15.)
     # test_array.run_topsis(scaling_array, decision_array)
+    # print test_array.results
+# 
+    mot = Motor.select().where(Motor.name == 'NTM PropDrive 28-36').get()
+    bat = Battery.select().where(Battery.name == 'Zippy3').get()
+    prop = Prop.select().where(Prop.diameter == 12.0).get()
 
+    test_array.compute_current(bat, mot, prop, 300.)
 
 
 
