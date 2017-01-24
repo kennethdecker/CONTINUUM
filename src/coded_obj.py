@@ -11,7 +11,9 @@ class CodedObj(object):
         self.levels = level_array
         self.modules = module_list
         self.query = QueryObj
+        self.compatibility = np.ones((np.sum(level_array), (np.sum(level_array))), dtype = np.int)
         self.coded_matrix()
+        self.build_namelist()
 
 
     def coded_matrix(self):
@@ -49,7 +51,34 @@ class CodedObj(object):
         # return design
         self.array = design
 
+    def build_namelist(self):
+        
+        namelist = {}
+        for i in module_list:
+            names = []
+            if i == 'Battery':
+                for j in self.query.battery:
+                    names.append(j.name)
 
+            elif i == 'Motor':
+                for j in self.query.motor:
+                    names.append(j.name)
+
+            elif i == 'Prop':
+                for j in self.query.prop:
+                    names.append(j.name)
+
+            elif i == 'ESC':
+                for j in self.query.esc:
+                    names.append(j.name)
+
+            elif i == 'Frame':
+                for j in self.query.frame:
+                    names.append(j.name)
+
+            namelist[i] = names
+
+        self.namelist = namelist 
 
     def evaluate_cases(self):
 
@@ -427,7 +456,49 @@ class CodedObj(object):
 
         self.array = np.delete(self.array, remove, axis = 0)
 
-        
+    def build_compatibility_matrix(self, incompatible, self_compatible = True):
+
+        modules = self.modules
+        levels = self.levels
+        namelist = self.namelist
+        main_matrix = self.compatibility
+
+        if self_compatible:
+            for i in range(len(levels)):
+                base = np.sum(levels[:i])
+                box_len = levels[i]
+                main_diag = [1]*box_len
+                diag_mat = np.zeros((box_len, box_len), dtype = np.int)
+                np.fill_diagonal(diag_mat, main_diag)
+
+                main_matrix[base:base + box_len, base:base + box_len] = diag_mat
+
+        for i in range(len(incompatible)):
+
+            name1, name2 = incompatible[i]
+
+            for mod1 in modules:
+                if name1 in namelist[mod1]:
+                    j1 = namelist[mod1].index(name1)
+
+                    break
+
+            for mod2 in modules:
+                if name2 in namelist[mod2]:
+                    j2 = namelist[mod2].index(name2)
+                    break
+
+            mod_num1 = modules.index(mod1)
+            mod_num2 = modules.index(mod2)
+
+            base1 = np.sum(levels[:mod_num1])
+            base2 = np.sum(levels[:mod_num2])
+
+            main_matrix[base1 + j1][base2 + j2] = 0
+            main_matrix[base2 + j2][base1 + j1] = 0
+
+        self.compatibility = main_matrix
+
 
     def run_topsis(self, scaling_array, decision_array):
 
@@ -509,6 +580,9 @@ if __name__ == '__main__':
     # test_array.endurance_constraint(10., 100.)
     # test_array.thrust_constraint(200.)
     # test_array.run_topsis(scaling_array, decision_array)
+    a = (('Gemfan 6x3', 'Zippy2'), ('Gemfan 6x3', 'Zippy1'))
+    test_array.build_compatibility_matrix(a)
+    print test_array.compatibility
     # print test_array.results
 
     # mot = Motor.select().where(Motor.name == 'NTM PropDrive 28-36').get()
