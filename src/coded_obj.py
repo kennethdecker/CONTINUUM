@@ -11,7 +11,9 @@ class CodedObj(object):
         self.levels = level_array
         self.modules = module_list
         self.query = QueryObj
+        self.compatibility = np.ones((np.sum(level_array), (np.sum(level_array))), dtype = np.int)
         self.coded_matrix()
+        self.build_namelist()
 
 
     def coded_matrix(self):
@@ -49,7 +51,34 @@ class CodedObj(object):
         # return design
         self.array = design
 
+    def build_namelist(self):
+        
+        namelist = {}
+        for i in module_list:
+            names = []
+            if i == 'Battery':
+                for j in self.query.battery:
+                    names.append(j.name)
 
+            elif i == 'Motor':
+                for j in self.query.motor:
+                    names.append(j.name)
+
+            elif i == 'Prop':
+                for j in self.query.prop:
+                    names.append(j.name)
+
+            elif i == 'ESC':
+                for j in self.query.esc:
+                    names.append(j.name)
+
+            elif i == 'Frame':
+                for j in self.query.frame:
+                    names.append(j.name)
+
+            namelist[i] = names
+
+        self.namelist = namelist 
 
     def evaluate_cases(self):
 
@@ -121,9 +150,8 @@ class CodedObj(object):
 
         self.attribute_list = attribute_list
         self.results = results
-        print '%d Current computaions failed to converge' % b
+        print '%d Current computations failed to converge' % b
 
-        # return results
 
     def compute_efficiency(self, batteryObj, motorObj, propObj):
 
@@ -227,36 +255,23 @@ class CodedObj(object):
 
         return t
 
-    def endurance_constraint(self, endurance, power, SF = .71):
+    def endurance_constraint(self, endurance):
 
-        m,n = self.array.shape
-        i = self.modules.index('Battery')
-        start_col = np.sum(self.levels[:i])
-        cols = range(start_col, start_col + self.levels[i])
+        m, n = self.array.shape
+        endurance_index = self.attribute_list.index('Endurance')
+        endurance_array = self.results[:, endurance_index]
 
-        omit = [];
-        i = 0
-        for bat in self.query.battery:
-            V = bat.volts
-            Q = bat.charge
-            I = power/V
-
-            if (endurance/SF) > (Q/I):
-                omit.append(i)
-
-            i += 1
-
-        reduced = self.array[:,cols]
         remove = []
-        i = 0
-        for j in range(m):
-            if (1 in reduced[j][omit]):
+        for i in range(len(endurance_array)):
+            if endurance_array[i] < (endurance):
                 remove.append(i)
-            i += 1
 
-        self.array = np.delete(self.array, remove, axis = 0)
+        new_array = np.delete(self.array, remove, axis = 0)
+        new_results = np.delete(self.results, remove, axis = 0)
 
-        # return self
+        self.array = new_array
+        self.results = new_results
+
 
     def thrust_constraint(self, T):
 
@@ -277,8 +292,10 @@ class CodedObj(object):
         k = 0
 
         for bat in self.query.battery:
+            i = 0
 
             for mot in self.query.motor:
+                j = 0
 
                 for prop in self.query.prop:
 
@@ -309,7 +326,7 @@ class CodedObj(object):
 
                         eps = 1.
 
-                        i = 1
+                        ii = 1
                         while eps > 1e-6:
                             
                             n_old = n_new
@@ -325,9 +342,9 @@ class CodedObj(object):
                             n_new = n_old - (f1/f_prime)
 
                             eps = np.abs((n_new - n_old)/n_old)
-                            i += 1
+                            ii += 1
 
-                            if i > 100:
+                            if ii > 100:
                                 print 'max iter reached'
                                 print 'n = %f ' % n_new
                                 print 'esps = %f' % eps
@@ -355,6 +372,7 @@ class CodedObj(object):
             k += 1
 
         # k = 0
+        
         motor_reduced = self.array[:, motor_cols]
         prop_reduced = self.array[:, prop_cols]
         bat_reduced = self.array[:, bat_cols]
@@ -376,10 +394,55 @@ class CodedObj(object):
             if ([i,j,k] in omit):
                 remove.append(a)
 
-
+        
         self.array = np.delete(self.array, remove, axis = 0)
+        self.results = np.delete(self.results, remove, axis = 0)
 
         # return self
+
+    def esc_constraint(self, SF = 1.2):
+        m, n = self.array.shape
+        i = self.modules.index('ESC')
+        esc_start = np.sum(self.levels[:i])
+        esc_cols = range(esc_start, esc_start + self.levels[i])
+        i = self.modules.index('Motor')
+        mot_start = np.sum(self.levels[:i])
+        mot_cols = range(mot_start, mot_start + self.levels[i])
+
+        omit = []
+        i = 0
+        j = 0
+        for esc in self.query.esc:
+            j = 0
+            for mot in self.query.motor:
+                esc_max_current = esc.max_constant_current
+                mot_max_current = mot.max_current
+
+                if esc_max_current > (mot_max_current * SF):
+                    omit.append([i,j])
+                j += 1
+
+            i += 1
+
+        esc_reduced = self.array[:, esc_cols]
+        mot_reduced = self.array[:, mot_cols]
+
+        remove = []
+        for k in range(m):
+            for ii in range(len(esc_cols)):
+                if esc_reduced[k][ii]:
+                    i = ii
+
+            for jj in range(len(mot_cols)):
+                if mot_reduced[k][jj]:
+                    j = jj
+
+            if ([i,j] in omit):
+                remove.append(k)
+
+        self.array = np.delete(self.array, remove, axis = 0)
+        self.results = np.delete(self.results, remove, axis = 0)
+
 
     def frame_constraint(self, SF = 1.1):
 
@@ -396,6 +459,7 @@ class CodedObj(object):
         j = 0
 
         for fram in self.query.frame:
+            j = 0
             for prop in self.query.prop:
 
                 length = fram.length    #Unpack frame length
@@ -426,8 +490,74 @@ class CodedObj(object):
                 remove.append(k)
 
         self.array = np.delete(self.array, remove, axis = 0)
+        self.results = np.delete(self.results, remove, axis = 0)
 
-        
+
+    def apply_compatibility(self, incompatible, self_compatible = True):
+
+        modules = self.modules
+        levels = self.levels
+        namelist = self.namelist
+        main_matrix = self.compatibility
+        design = self.array
+
+        if self_compatible:
+            for i in range(len(levels)):
+                base = np.sum(levels[:i])
+                box_len = levels[i]
+                main_diag = [1]*box_len
+                diag_mat = np.zeros((box_len, box_len), dtype = np.int)
+                np.fill_diagonal(diag_mat, main_diag)
+
+                main_matrix[base:base + box_len, base:base + box_len] = diag_mat
+
+        for i in range(len(incompatible)):
+
+            name1, name2 = incompatible[i]
+
+            for mod1 in modules:
+                if name1 in namelist[mod1]:
+                    j1 = namelist[mod1].index(name1)
+
+                    break
+
+            for mod2 in modules:
+                if name2 in namelist[mod2]:
+                    j2 = namelist[mod2].index(name2)
+                    break
+
+            mod_num1 = modules.index(mod1)
+            mod_num2 = modules.index(mod2)
+
+            base1 = np.sum(levels[:mod_num1])
+            base2 = np.sum(levels[:mod_num2])
+
+            main_matrix[base1 + j1][base2 + j2] = 0
+            main_matrix[base2 + j2][base1 + j1] = 0
+
+        self.compatibility = main_matrix
+
+        index_list = []
+        for i in range(len(main_matrix)):
+            for j in range(i, len(main_matrix[i])):
+                val = main_matrix[i][j]
+                if val == 0:
+                    index_list.append([i,j])
+
+        remove = []
+        for pair in index_list:
+            val1, val2 = pair
+            i = 0
+            for row in design:
+                if (row[val1] == 1 and row[val2] == 1):
+                    remove.append(i)
+                i += 1
+
+        new_design = np.delete(design, remove, axis = 0)
+        new_results = np.delete(design, remove, axis =0)
+
+        self.array = new_design
+        self.results = new_results
 
     def run_topsis(self, scaling_array, decision_array):
 
@@ -480,11 +610,6 @@ class CodedObj(object):
 
 
 
-
-
-
-
-
 if __name__ == '__main__':
 
     db = SqliteDatabase('../database/continuum.db')
@@ -505,10 +630,12 @@ if __name__ == '__main__':
 
     test_array = CodedObj(level_array, module_list, data_set)
 
-    # test_array.evaluate_cases()
-    # test_array.endurance_constraint(10., 100.)
+    test_array.evaluate_cases()
+    test_array.endurance_constraint(10.)
     # test_array.thrust_constraint(200.)
     # test_array.run_topsis(scaling_array, decision_array)
+    # a = (('Gemfan 6x3', 'Zippy2'), ('Gemfan 6x3', 'Zippy1'))
+    # test_array.apply_compatibility(a, self_compatible = True)
     # print test_array.results
 
     # mot = Motor.select().where(Motor.name == 'NTM PropDrive 28-36').get()
