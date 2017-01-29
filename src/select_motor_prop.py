@@ -114,6 +114,7 @@ def select_motor_prop(motorObj, propObj, batObj, T, I_max = None, plot_results =
 
         I_req = (tau/kt) + I0
         V_req = (rpm/kv) + I_req*Rm
+        eta = np.sqrt((2.*((T/101.971621298)**3.))/(1.225*((D*.0254)**2.)))/((V_in - I_req*Rm)*I_req)
         print 'RPM = %f' % rpm
 
         print 'Current = %f' % I_req
@@ -173,13 +174,13 @@ def select_motor_prop(motorObj, propObj, batObj, T, I_max = None, plot_results =
             plt.xlabel('RPM', fontsize = 12, fontweight = 'bold')
             plt.ylabel('T (gf)', fontsize = 12, fontweight = 'bold')
             plt.title('5x4 Propeller Thrust', fontsize = 10, fontweight = 'bold')
-            plt.xlim(10000, 30000)
-            # plt.ylim(1,1.5)
+            # plt.xlim(10000, 30000)
+            # plt.ylim(.05, .1)
             plt.savefig('/Users/kennethdecker/Desktop/Grand_Challenge/presentation_plots/5x4_prop_raw_thrust.png', format = 'png', dpi = 300)
             # plt.show()
 
         # return (I_req< I_max) and (V_req < V_in)
-        return (rpm, I_req, V_req)
+        return (rpm, I_req, V_req, eta)
         
 
 
