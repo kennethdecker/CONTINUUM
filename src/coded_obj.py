@@ -155,6 +155,10 @@ class CodedObj(object):
 
     def compute_efficiency(self, batteryObj, motorObj, propObj):
 
+        batteryObj = self.query.battery
+        motorObj = self.query.motor
+        propObj = self.query.prop
+
         Kv = motorObj.kv
         Rm = motorObj.Rm
         I0 = motorObj.I0
@@ -249,9 +253,9 @@ class CodedObj(object):
             
             return I_req
 
-    def compute_endurance(self, batteryObj, I, SF = .71):
+    def compute_endurance(self, batteryObj, I, SF = .71, num_bat = 1, num_prop = 4):
         Q = batteryObj.charge*(60.0/1000.0)
-        t = (Q*SF)/I
+        t = (num_bat*Q*SF)/(I*num_prop)
 
         return t
 
