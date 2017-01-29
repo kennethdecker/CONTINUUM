@@ -4,7 +4,7 @@ from peewee import *
 from create_database import *
 import sys
 
-def select_motor_prop(motorObj, propObj, batObj, T, I_max):
+def select_motor_prop(motorObj, propObj, batObj, T, I_max = None, plot_results = True):
     ''' This function checks to see if a motor-propeller combination is capable of producing the required
     amount of power within maximum current constraints. Prop performance is evaluated using UIUC raw data.
     Assums negligible zero load current
@@ -104,7 +104,6 @@ def select_motor_prop(motorObj, propObj, batObj, T, I_max):
                 print 'esps = %f' % eps
                 sys.exit()
 
-        print i
         n_list2, Cq_list = np.loadtxt(data_folder + 'n_vs_cq.txt', skiprows = 1, unpack = True)
         fit2 = np.polyfit(n_list2, Cq_list, 1)
         p2 = np.poly1d(fit2)
@@ -115,12 +114,72 @@ def select_motor_prop(motorObj, propObj, batObj, T, I_max):
 
         I_req = (tau/kt) + I0
         V_req = (rpm/kv) + I_req*Rm
-        print rpm
+        print 'RPM = %f' % rpm
 
-        print I_req
-        print V_req
+        print 'Current = %f' % I_req
+        print 'Voltage = %f' % V_req
 
-        return (I_req< I_max) and (V_req < V_in)
+        if plot_results:
+
+            n_test = np.linspace(150, 500, 5)
+            Ct_test = map(lambda x: p(x), n_test)
+            T_list = map(lambda Ct, n: Ct*(rho*(n**2.)*((D/12.)**4.)), Ct_list, n_list)
+            Cq_test = map(lambda y: p2(y), n_list)
+
+            fit3 = np.polyfit(n_list, T_list, 2)
+            p3 = np.poly1d(fit3)
+            T_test = map(lambda x: p3(x), n_test)
+
+            fig = plt.figure(figsize = (3.5,3.25), tight_layout = True)
+            ax = plt.axes()
+            plt.setp(ax.get_xticklabels(), fontsize=8)
+            plt.setp(ax.get_yticklabels(), fontsize=8)
+            plt.hold(True)
+            line1, = plt.plot(n_list*60., Ct_list, 'bo', label = 'Raw Data')
+            line2, = plt.plot(n_test*60., Ct_test, 'r--', linewidth = 2.0, label = 'Regression')
+            # line3, = plt.plot(delta_star, A_tube[2,:], 'g-', linewidth = 2.0, label = 'A_pod = 3.0 $m^2$')
+            plt.xlabel('RPM', fontsize = 12, fontweight = 'bold')
+            plt.ylabel('$C_{T}$', fontsize = 12, fontweight = 'bold')
+            plt.title('5x4 Propeller Thrust Coefficient', fontsize = 10, fontweight = 'bold')
+            plt.xlim(10000, 30000)
+            plt.ylim(7,12)
+            plt.savefig('/Users/kennethdecker/Desktop/Grand_Challenge/presentation_plots/5x4_prop_thrust.png', format = 'png', dpi = 300)
+            # plt.show()
+
+            fig2 = plt.figure(figsize = (3.5,3.25), tight_layout = True)
+            ax2 = plt.axes()
+            plt.setp(ax2.get_xticklabels(), fontsize=8)
+            plt.setp(ax2.get_yticklabels(), fontsize=8)
+            plt.hold(True)
+            line1, = plt.plot(n_list2*60., Cq_list, 'bo', label = 'Raw Data')
+            line2, = plt.plot(n_test*60., Cq_test, 'r--', linewidth = 2.0, label = 'Regression')
+            # line3, = plt.plot(delta_star, A_tube[2,:], 'g-', linewidth = 2.0, label = 'A_pod = 3.0 $m^2$')
+            plt.xlabel('RPM', fontsize = 12, fontweight = 'bold')
+            plt.ylabel('$C_{Q}$', fontsize = 12, fontweight = 'bold')
+            plt.title('5x4 Propeller Thrust Coefficient', fontsize = 10, fontweight = 'bold')
+            plt.xlim(18000, 30000)
+            plt.ylim(1,1.5)
+            plt.savefig('/Users/kennethdecker/Desktop/Grand_Challenge/presentation_plots/5x4_prop_torque.png', format = 'png', dpi = 300)
+            # plt.show()
+
+            fig3 = plt.figure(figsize = (3.5,3.25), tight_layout = True)
+            ax3 = plt.axes()
+            plt.setp(ax3.get_xticklabels(), fontsize=8)
+            plt.setp(ax3.get_yticklabels(), fontsize=8)
+            plt.hold(True)
+            line1, = plt.plot(n_list*60., T_list, 'bo', label = 'Raw Data')
+            line2, = plt.plot(n_test*60., T_test, 'r--', linewidth = 2.0, label = 'Regression')
+            # line3, = plt.plot(delta_star, A_tube[2,:], 'g-', linewidth = 2.0, label = 'A_pod = 3.0 $m^2$')
+            plt.xlabel('RPM', fontsize = 12, fontweight = 'bold')
+            plt.ylabel('T (gf)', fontsize = 12, fontweight = 'bold')
+            plt.title('5x4 Propeller Thrust', fontsize = 10, fontweight = 'bold')
+            plt.xlim(10000, 30000)
+            # plt.ylim(1,1.5)
+            plt.savefig('/Users/kennethdecker/Desktop/Grand_Challenge/presentation_plots/5x4_prop_raw_thrust.png', format = 'png', dpi = 300)
+            # plt.show()
+
+        # return (I_req< I_max) and (V_req < V_in)
+        return (rpm, I_req, V_req)
         
 
 
@@ -131,8 +190,8 @@ if __name__ == '__main__':
 
     motor_query = Motor.select().where(Motor.name == 'MT-1806').get()
     # prop_query = Prop.select().where(Prop.diameter == 10.0).get()
-    prop_query = Prop.select().where(Prop.name == 'Gemfan 5x4.5').get()
-    bat_query = Battery.select().where(Battery.name == 'Zippy1').get()
+    prop_query = Prop.select().where(Prop.name == 'Gemfan 5x4').get()
+    bat_query = Battery.select().where(Battery.name == 'Turnigy1').get()
 
-    print select_motor_prop(motor_query, prop_query, bat_query, 200.0, 15.0)
+    print select_motor_prop(motor_query, prop_query, bat_query, 150.0, 15.0, plot_results = False)
 
