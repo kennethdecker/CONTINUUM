@@ -16,11 +16,13 @@ def data_validation(file, motorObj, propObj, batteryObj, plot_results = False):
     n_col = sheet.columns[8]
     throttle_col = sheet.columns[13]
     T_col = sheet.columns[14]
+    eta_col = sheet.columns[18]
 
     I = []
     n = []
     throttle = []
     T = []
+    eta = []
 
     for i in range(len(I_col)):
 
@@ -36,9 +38,13 @@ def data_validation(file, motorObj, propObj, batteryObj, plot_results = False):
         if not ((T_col[i].value == None) or isinstance(T_col[i].value, basestring)):
             T.append(float(T_col[i].value))
 
+        if not ((T_col[i].value == None) or isinstance(T_col[i].value, basestring)):
+            eta.append(float(eta_col[i].value))
+
     I_red = []
     n_red = []
     T_red = []
+    eta_red = []
 
     for i in range(len(I)):
 
@@ -46,14 +52,17 @@ def data_validation(file, motorObj, propObj, batteryObj, plot_results = False):
             I_red.append(I[i])
             n_red.append(n[i])
             T_red.append(T[i])
+            eta_red.append(eta[i])
 
     n_pred = []
     I_pred = []
+    eta_pred = []
 
     for i in T_red:
-        n_new, I_new, V_new = select_motor_prop(motorObj, propObj, batteryObj, i, plot_results = False)
+        n_new, I_new, V_new, eta_new = select_motor_prop(motorObj, propObj, batteryObj, i, plot_results = False)
         n_pred.append(n_new)
         I_pred.append(I_new)
+        eta_pred.append(eta_new)
 
     if plot_results:
         fig = plt.figure(figsize = (3.5,3.25), tight_layout = True)
@@ -71,7 +80,7 @@ def data_validation(file, motorObj, propObj, batteryObj, plot_results = False):
         # plt.xlim(10000, 30000)
         plt.ylim(20000,25000)
         plt.savefig('../Experimental_Data/validation_plots/5x4_prop_rpm.png', format = 'png', dpi = 300)
-        plt.show()
+        # plt.show()
 
         fig2 = plt.figure(figsize = (3.5,3.25), tight_layout = True)
         ax2 = plt.axes()
@@ -88,7 +97,24 @@ def data_validation(file, motorObj, propObj, batteryObj, plot_results = False):
         # plt.xlim(10000, 30000)
         plt.ylim(8,12)
         plt.savefig('../Experimental_Data/validation_plots/5x4_prop_current.png', format = 'png', dpi = 300)
-        plt.show()
+        # plt.show()
+
+        fig3 = plt.figure(figsize = (3.5,3.25), tight_layout = True)
+        ax3 = plt.axes()
+        plt.setp(ax3.get_xticklabels(), fontsize=8)
+        plt.setp(ax3.get_yticklabels(), fontsize=8)
+        plt.hold(True)
+        line1, = plt.plot(T_red, eta_red, 'bo', label = 'Raw Data')
+        line2, = plt.plot(T_red, eta_pred, 'r:', linewidth = 2.0, label = 'Regression')
+        # line3, = plt.plot(delta_star, A_tube[2,:], 'g-', linewidth = 2.0, label = 'A_pod = 3.0 $m^2$')
+        plt.xlabel('Thrust (gf)', fontsize = 12, fontweight = 'bold')
+        plt.ylabel('$\eta$', fontsize = 12, fontweight = 'bold')
+       
+        plt.title('5x4 Propeller', fontsize = 10, fontweight = 'bold')
+        # plt.xlim(10000, 30000)
+        plt.ylim(.05,.1)
+        plt.savefig('../Experimental_Data/validation_plots/5x4_prop_efficiency.png', format = 'png', dpi = 300)
+        # plt.show()
 
 
     return None
@@ -99,7 +125,7 @@ if __name__ == '__main__':
     db.connect()
 
     # folder = '/Users/kennethdecker/Documents/CONTINUUM/Experimental Data/Final/Small motor/MT 1806-2280KV'
-    file = '../Experimental_Data/Final/Small motor/MT 1806-2280KV/5040R_KK_MT1806 2280KV_zippy2200_4S.xlsx'
+    file = '../Experimental_Data/Final/Small motor Efficiency/MT 1806-2280KV/5040R_KK_MT1806 2280KV_zippy2200_4S.xlsx'
 
     motor_query = Motor.select().where(Motor.name == 'MT-1806').get()
     # prop_query = Prop.select().where(Prop.diameter == 10.0).get()
