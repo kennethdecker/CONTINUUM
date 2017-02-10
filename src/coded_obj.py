@@ -54,6 +54,7 @@ class CodedObj(object):
     def build_namelist(self):
         
         namelist = {}
+        module_list = self.modules
         for i in module_list:
             names = []
             if i == 'Battery':
