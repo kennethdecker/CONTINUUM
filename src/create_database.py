@@ -33,8 +33,9 @@ class Prop(Model):
     weight = FloatField() #Define weight in g
     diameter = FloatField() #Define prop diameter in in.
     pitch = FloatField() # Define prop pitch in in/rev
+    shaft_diameter = FloatField(default = 0.0) #Define allowable prop shaft diameter [mm]
     data = CharField(default = 'null') #Define data file directory
-    cad = CharField(null = True) #Defin cad file directory
+    cad = CharField(null = True) #Defin4 cad file directory
 
     class Meta:
         database = db #This model is stored in continuum.db database
@@ -150,7 +151,7 @@ prop1 = Prop(name = [char], weight = [float], \
             diameter = [float], pitch = [float], cad = [char])
 
 '''
-gemfan1 = Prop(name = 'Gemfan 5x3', weight = 3.0, diameter = 5.0, pitch = 3.0,
+gemfan1 = Prop(name = 'Gemfan 5x3', weight = 3.0, diameter = 5.0, pitch = 3.0, shaft_diameter = 3.0, \
                 data = '../prop_data/5x3/', cad = None)
 gemfan1.save()
 

@@ -497,6 +497,26 @@ class CodedObj(object):
         self.array = np.delete(self.array, remove, axis = 0)
         self.results = np.delete(self.results, remove, axis = 0)
 
+    def prop_motor_incompatibility(self):
+
+        propObj = self.query.prop
+        motorObj = self.query.motor
+
+        incompatible_list = []
+
+        for prop in propObj:
+
+            if prop.shaft_diameter == 0.0:
+                continue
+
+            for mot in motorObj:
+
+                if mot.shaft_diameter != prop.shaft_diameter:
+                    incompatible_list.append([mot.name, prop.name])
+
+        self.incompatible_list = incompatible_list
+
+
 
     def apply_compatibility(self, incompatible, self_compatible = True):
 
@@ -635,13 +655,17 @@ if __name__ == '__main__':
 
     test_array = CodedObj(level_array, module_list, data_set)
 
-    test_array.evaluate_cases()
-    test_array.endurance_constraint(10.)
+    # test_array.evaluate_cases()
+    # test_array.endurance_constraint(10.)
     # test_array.thrust_constraint(200.)
     # test_array.run_topsis(scaling_array, decision_array)
     # a = (('Gemfan 6x3', 'Zippy2'), ('Gemfan 6x3', 'Zippy1'))
+    # a = [['Gemfan 6x3', 'Zippy2'], ['Gemfan 6x3', 'Zippy1']]
     # test_array.apply_compatibility(a, self_compatible = True)
+    # print test_array.compatibility
     # print test_array.results
+    test_array.prop_motor_incompatibility()
+    print test_array.incompatible_list
 
     # mot = Motor.select().where(Motor.name == 'NTM PropDrive 28-36').get()
     # bat = Battery.select().where(Battery.name == 'Zippy3').get()
