@@ -41,6 +41,7 @@ def run_topsis(data_array, scaling_array, decision_array):
     closeness = np.zeros((1,n), dtype = np.float64)
 
     trans = data_array.T
+
     for i in range(n):
         norm_array[0][i] = np.linalg.norm(trans[i])
         
