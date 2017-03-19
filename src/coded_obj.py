@@ -184,13 +184,13 @@ class CodedObj(object):
                             battery = self.query.battery[k]
 
                     elif self.modules[j] == 'Motor':
-                        weight = weight + self.array[i][col] * self.query.motor[k].weight
+                        weight = weight + self.array[i][col] * self.query.motor[k].weight * num_props
                         
                         if self.array[i][col] == 1:
                             motor = self.query.motor[k]
 
                     elif self.modules[j] == 'Prop':
-                        weight = weight + self.array[i][col] * self.query.prop[k].weight
+                        weight = weight + self.array[i][col] * self.query.prop[k].weight * num_props
                         
                         if self.array[i][col] == 1:
                             prop = self.query.prop[k]
