@@ -1,0 +1,100 @@
+/* //////////////// Description ////////////////
+
+This simple script allows performing endurance tests for extended periods of time. The user defines a test sequence consisting of arbitrary steps with arbitrary durations. The sequence can be repeated as many times as required. A data sample is recorded at the middle of every step in the test sequence.
+
+Assuming the user specified test is as follows:
+test = [[1200, 4], [1400, 2], [1200, 4], [1600, 1]];
+
+The test will be as follows: 
+
+  . represents where a sample will be recorded
+  * represents the end of the script, or where the sequence will repeat
+
+     ^ Motor Input
+1600 |                         __._
+1400 |              __._      |    |               
+1200 |        __.__|    |__.__|    |  
+1000 |    ___|                     *
+     |_______0_____4____6_____10___11_________> Time
+
+In this example, the throttle starts at 1000 to initialize the ESC, and the sequence then begins. The sequence starts at time t=0 and finishes at time t=11. If the sequence repeats, it will repeat at 11s = 0s.
+
+///////////// User defined script parameters //////////// */
+
+// Test sequence: here we have four points defined, but you can 
+// put as many as you want. First value is ESC pwm, and second 
+// value is duration in seconds.
+var test = [[1200, 3], [1400, 3], [1600, 3], [1800, 3], [2000, 3], [2200, 3], [2300, 3], [2200, 3], [2000, 3], [1800, 3], [1600, 3], [1400, 3], [1200, 3]]; 
+
+// Test repeat
+var repeat = 1; // set to 1 to run the sequence only once
+
+// ESC initialization
+var minVal = 1000;  // ESC initialization value (us)
+var initDur = 4; // ESC initialization time (s)
+
+var filePrefix = "CustomSequence"; 
+
+///////////////// Beginning of the script //////////////////
+
+// ESC initialization
+rcb.console.print("Initializing ESC...");
+rcb.output.pwm("esc",minVal);
+rcb.wait(sequence, initDur);
+
+// hide console debug info
+rcb.console.setVerbose(false);
+
+// start new log file
+rcb.files.newLogFile({prefix: filePrefix});
+
+// runs the sequence
+var index = -1;
+var total = repeat;
+var totalTime = 0;
+function sequence(){
+    if(index > -1){
+        if(index === test.length){
+            // end of sequence
+            index = -1;
+            sequence();
+        }else{
+            // get step info
+            var pwm = test[index][0];
+            var time = test[index][1];
+            
+            rcb.console.print(pwm + " for " + time + "s...");
+            
+            // set the output
+            rcb.output.pwm("esc",pwm);
+            
+            // wait half the time
+            rcb.wait(function (){
+                totalTime = totalTime + time/2;
+                index ++;
+                
+                // take a sample
+                rcb.sensors.read(function(data){
+                    data.time.displayValue = totalTime;
+                    rcb.files.newLogEntry(data);
+                    rcb.console.print("sample saved");
+                }, 1);
+                
+                // wait the other half and continue
+                rcb.wait(function (){
+                    totalTime = totalTime + time/2;
+                    sequence();
+                }, time/2);
+            }, time/2);
+        }
+    }else{
+        if(repeat > 0){
+            rcb.console.print("Sequence " + (total-repeat+1) + " of " + total);
+            repeat--;
+            index++;
+            sequence();
+        }else{
+            rcb.endScript();
+        }
+    }
+}
