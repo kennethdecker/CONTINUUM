@@ -15,7 +15,7 @@ def main():
     mission = MissionProfile()
     mission.add_element('Climb', 50.)
     mission.add_element('Cruise', 100.)
-    mission.add_element('Loiter', 3.)
+    mission.add_element('Loiter', 15.)
     mission.add_element('Cruise', 100.)
 
     #Query Database

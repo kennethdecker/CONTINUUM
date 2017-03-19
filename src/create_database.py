@@ -152,32 +152,32 @@ prop1 = Prop(name = [char], weight = [float], \
 
 '''
 gemfan1 = Prop(name = 'Gemfan 5x3', weight = 3.0, diameter = 5.0, pitch = 3.0, shaft_diameter = 3.0, \
-                data = '../prop_data/5x3/', cad = None)
+                data = '../prop_data/5030.csv', cad = None)
 gemfan1.save()
 
-gemfan2 = Prop(name = 'Gemfan 5x4', weight = 3.0, \
-            diameter = 5.0, pitch = 4.0, data = '../prop_data/5x4/', cad = None)
-gemfan2.save()
+# gemfan2 = Prop(name = 'Gemfan 5x4', weight = 3.0, \
+#             diameter = 5.0, pitch = 4.0, data = '../prop_data/5040.csv', cad = None)
+# gemfan2.save()
 
 gemfan3 = Prop(name = 'Gemfan 5x4.5', weight = 3.0, \
-            diameter = 5.0, pitch = 4.5, data = '../prop_data/5x4_5/', cad = None)
+            diameter = 5.0, pitch = 4.5, data = '../prop_data/5045.csv', cad = None)
 gemfan3.save()
 
 gemfan4 = Prop(name = 'Gemfan 6x3', weight = 3.8, \
-            diameter = 6.0, pitch = 3.0, data = '../prop_data/6x3/', cad = None)
+            diameter = 6.0, pitch = 3.0, data = '../prop_data/6030.csv', cad = None)
 gemfan4.save()
 
 gemfan5 = Prop(name = 'Gemfan 6x4.5', weight = 3.8, \
-            diameter = 6.0, pitch = 4.5, data = '../prop_data/6x4_5/', cad = None)
+            diameter = 6.0, pitch = 4.5, data = '../prop_data/6045.csv', cad = None)
 gemfan5.save()
 
-gemfan6 = Prop(name = 'Gemfan 10x4.5', weight = 8.5, \
-            diameter = 10.0, pitch = 4.5, data = '../prop_data/10x4_5/', cad = None)
-gemfan6.save()
+# gemfan6 = Prop(name = 'Gemfan 10x4.5', weight = 8.5, \
+#             diameter = 10.0, pitch = 4.5, data = '../prop_data/10x4_5/', cad = None)
+# gemfan6.save()
 
-gemfan7 = Prop(name = 'Gemfan 12x4.5', weight = 8.5, \
-            diameter = 12.0, pitch = 4.5, data = '../prop_data/12x4_5/', cad = None)
-gemfan7.save()
+# gemfan7 = Prop(name = 'Gemfan 12x4.5', weight = 8.5, \
+#             diameter = 12.0, pitch = 4.5, data = '../prop_data/12x4_5/', cad = None)
+# gemfan7.save()
 
 ##### Add Battery #####
 

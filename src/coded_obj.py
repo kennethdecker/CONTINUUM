@@ -352,7 +352,7 @@ class CodedObj(object):
         V_in = batteryObj.volts
 
         if data_folder != 'null':
-            n_list, Ct_list = np.loadtxt(data_folder + 'n_vs_ct.txt', skiprows = 1, unpack = True) #Unpack info from raw data
+            n_list, Ct_list, Cq_list = np.loadtxt(data_folder, delimiter = ',', skiprows = 1, unpack = True) #Unpack info from raw data
             fit1 = np.polyfit(n_list, Ct_list, 1)
             p = np.poly1d(fit1)
 
@@ -393,8 +393,8 @@ class CodedObj(object):
                     # sys.exit()
 
 
-            n_list2, Cq_list = np.loadtxt(data_folder + 'n_vs_cq.txt', skiprows = 1, unpack = True)
-            fit2 = np.polyfit(n_list2, Cq_list, 1)
+            # n_list2, Cq_list = np.loadtxt(data_folder + 'n_vs_cq.txt', skiprows = 1, unpack = True)
+            fit2 = np.polyfit(n_list, Cq_list, 1)
             p2 = np.poly1d(fit2)
 
             Cq = p2(n_new)
@@ -402,7 +402,7 @@ class CodedObj(object):
             rpm = n_new*60.
             I_req = (tau/kt) + I0
             V_req = (rpm/kv) + I_req*Rm
-
+            
             if RPMout:
             	return (I_req, n_new*60.0)
             else:
@@ -864,7 +864,7 @@ class CodedObj(object):
 
             #Evaluate Required current
             if data_folder != 'null':
-                n_list, Ct_list = np.loadtxt(data_folder + 'n_vs_ct.txt', skiprows = 1, unpack = True) #Unpack info from raw data
+                n_list, Ct_list, Cq_list = np.loadtxt(data_folder, delimiter = ',', skiprows = 1, unpack = True) #Unpack info from raw data
                 fit1 = np.polyfit(n_list, Ct_list, 1)
                 p = np.poly1d(fit1)
 
@@ -898,8 +898,8 @@ class CodedObj(object):
                         raise RuntimeError('RPM computation did not converge')
 
 
-                n_list2, Cq_list = np.loadtxt(data_folder + 'n_vs_cq.txt', skiprows = 1, unpack = True)
-                fit2 = np.polyfit(n_list2, Cq_list, 1)
+                # n_list2, Cq_list = np.loadtxt(data_folder + 'n_vs_cq.txt', skiprows = 1, unpack = True)
+                fit2 = np.polyfit(n_list, Cq_list, 1)
                 p2 = np.poly1d(fit2)
 
                 Cq = p2(n_new)
@@ -1249,22 +1249,22 @@ if __name__ == '__main__':
     test_mission.add_element('Cruise', 500.)
     test_array.add_mission(test_mission)
     test_array.evaluate_cases(TR_static = 2.0, initial_weight = 200.)
-    # test_array.mission_constraint()
+    test_array.mission_constraint()
     m,n = test_array.array.shape
     print m
     test_array.thrust_constraint(2.0)
     m,n = test_array.array.shape
-    print m
-    # print test_array.results
-    # print test_array.modules
 
 
-    # mot = Motor.select().where(Motor.name == 'NTM PropDrive 28-26').get()
+
+    # mot = Motor.select().where(Motor.name == 'MT-1806').get()
     # bat = Battery.select().where(Battery.name == 'Zippy1').get()
     # prop = Prop.select().where(Prop.name == 'Gemfan 5x3').get()
 
     # u =  test_array.compute_max_speed(bat, mot, prop, 2.0, 465.)
     # I, RPM = test_array.compute_current(bat, mot, prop, 465./4, RPMout = True)
+    # print I
+    # print RPM/60.
     
     # print u
 
