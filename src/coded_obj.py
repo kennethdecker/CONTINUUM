@@ -157,7 +157,7 @@ class CodedObj(object):
         '''
 
         m,n = self.array.shape
-        attribute_list = ['Weight', 'Efficiency', 'Current', 'Endurance', 'Charge']
+        attribute_list = ['Weight', 'Efficiency', 'Current', 'Endurance at max thrust', 'Charge']
         results = np.zeros((m, len(attribute_list)), dtype = np.float64)
         modules = len(self.levels)
 
@@ -250,7 +250,7 @@ class CodedObj(object):
                     results[i][j] = efficiency
                 elif attribute_list[j] == 'Current':
                     results[i][j] = I
-                elif attribute_list[j] == 'Endurance':
+                elif attribute_list[j] == 'Endurance at max thrust':
                     results[i][j] = endurance
                 elif attribute_list[j] == 'Charge':
                     results[i][j] = Q
@@ -640,7 +640,7 @@ class CodedObj(object):
             Q_req = 0.0 #[mAh]
 
             for time in loiter_segs:
-                T_req = weight*1.2
+                T_req = weight*1.1
                 I_req = self.compute_current(batteryObj, motorObj, propObj, T_req/num_props, RPMout = False)
                 Q_loiter = ((I_req + initial_current/4.0)*num_props)*time*(1000.0/60.0)
 

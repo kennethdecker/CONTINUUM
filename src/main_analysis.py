@@ -42,8 +42,9 @@ def main():
 
     #Set incompatibility List
     incompatible = (
-        ('NTM PropDrive 28-26', 'Gemfan 5x3'),
-        ('NTM PropDrive 28-36', 'Gemfan 5x3')
+        ('MT-1806', 'Gemfan 6x4.5'),
+        ('PM-1806', 'Gemfan 6x4.5'),
+        ('PM-1806', 'Gemfan 6x3')
         )
 
     #Apply constraints and perform topsis

@@ -119,13 +119,13 @@ motor1 = Motor(name = [char], weight = [float], kv = [float], \
 
 '''
 
-ntm_2826 = Motor(name = 'NTM PropDrive 28-26', weight = 54.0, kv = 1200.0, \
-    max_current = 17.0, Rm = .05899, shaft_diameter = 3.0, cad = None)
-ntm_2826.save()
+# ntm_2826 = Motor(name = 'NTM PropDrive 28-26', weight = 54.0, kv = 1200.0, \
+#     max_current = 17.0, Rm = .05899, shaft_diameter = 3.0, cad = None)
+# ntm_2826.save()
 
-ntm_2836 = Motor(name = 'NTM PropDrive 28-36', weight = 87.0, kv = 750.0, \
-    max_current = 18.0, Rm = .06236, I0 = .2, shaft_diameter = 4.0, cad = None)
-ntm_2836.save()
+# ntm_2836 = Motor(name = 'NTM PropDrive 28-36', weight = 87.0, kv = 750.0, \
+#     max_current = 18.0, Rm = .06236, I0 = .2, shaft_diameter = 4.0, cad = None)
+# ntm_2836.save()
 
 mt_1806 = Motor(name = 'MT-1806', weight = 18.0, kv = 2280.0, \
     max_current = 12.0, Rm = .04897, I0 = .2, shaft_diameter = 2.0, cad = None)
